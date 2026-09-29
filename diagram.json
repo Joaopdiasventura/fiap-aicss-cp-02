@@ -1,0 +1,75 @@
+{
+  "version": 1,
+  "author": "Joao Paulo Dias",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "board-esp32-devkit-c-v4", "id": "esp", "top": 30, "left": -230, "attrs": {} },
+    { "type": "wokwi-breadboard-half", "id": "bb1", "top": 0, "left": 100, "attrs": {} },
+    {
+      "type": "wokwi-pushbutton-6mm",
+      "id": "btn1",
+      "top": 48,
+      "left": 157,
+      "rotate": 90,
+      "attrs": { "color": "green", "xray": "1" }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r1",
+      "top": 110,
+      "left": 168,
+      "rotate": 90,
+      "attrs": { "value": "1000" }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "ledBlue",
+      "top": 48,
+      "left": 330,
+      "attrs": { "color": "blue", "flip": "1" }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "rBlue",
+      "top": 105,
+      "left": 292,
+      "rotate": 90,
+      "attrs": { "value": "1000" }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "ledRed",
+      "top": 48,
+      "left": 430,
+      "attrs": { "color": "red", "flip": "1" }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "rRed",
+      "top": 105,
+      "left": 392,
+      "rotate": 90,
+      "attrs": { "value": "1000" }
+    }
+  ],
+  "connections": [
+    [ "esp:TX", "$serialMonitor:RX", "", [] ],
+    [ "esp:RX", "$serialMonitor:TX", "", [] ],
+    [ "esp:3V3", "bb1:tp.1", "red", [ "v-75", "h310" ] ],
+    [ "esp:GND.1", "bb1:bn.1", "black", [ "v94.8", "h359.39" ] ],
+    [ "bb1:tp.5", "btn1:2.l", "red", [ "v30" ] ],
+    [ "btn1:1.l", "esp:4", "green", [ "v-112", "h-310" ] ],
+    [ "btn1:1.r", "r1:1", "green", [ "h15", "v25" ] ],
+    [ "r1:2", "bb1:bn.8", "black", [ "v35" ] ],
+    [ "esp:22", "rBlue:1", "blue", [ "v-105", "h446.04", "v108" ] ],
+    [ "rBlue:2", "ledBlue:A", "blue", [ "h22", "v-32" ] ],
+    [ "ledBlue:C", "bb1:bn.20", "black", [ "h0.2", "v106.3" ] ],
+    [ "esp:23", "rRed:1", "red", [ "v-122", "h551.64", "v134.6" ] ],
+    [ "rRed:2", "ledRed:A", "red", [ "h22", "v-32" ] ],
+    [ "ledRed:C", "bb1:bn.25", "black", [ "h5.8", "v106.3" ] ],
+    [ "ledBlue:A", "bb1:24t.e", "", [ "$bb" ] ],
+    [ "ledBlue:C", "bb1:25t.e", "", [ "$bb" ] ]
+  ],
+  "serialMonitor": { "convertEol": false, "display": "always", "newline": "crlf" },
+  "dependencies": {}
+}
