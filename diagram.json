@@ -66,9 +66,7 @@
     [ "ledBlue:C", "bb1:bn.20", "black", [ "h0.2", "v106.3" ] ],
     [ "esp:23", "rRed:1", "red", [ "v-122", "h551.64", "v134.6" ] ],
     [ "rRed:2", "ledRed:A", "red", [ "h22", "v-32" ] ],
-    [ "ledRed:C", "bb1:bn.25", "black", [ "h5.8", "v106.3" ] ],
-    [ "ledBlue:A", "bb1:24t.e", "", [ "$bb" ] ],
-    [ "ledBlue:C", "bb1:25t.e", "", [ "$bb" ] ]
+    [ "ledRed:C", "bb1:bn.25", "black", [ "h5.8", "v106.3" ] ]
   ],
   "serialMonitor": { "convertEol": false, "display": "always", "newline": "crlf" },
   "dependencies": {}

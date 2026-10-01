@@ -1,41 +1,54 @@
-# NetGuard - Checkpoint 2 AICSS
+# NetGuard - AICSS CP2
 
-Sistema para validar se um IPv4 informado no Serial Monitor corresponde ao IPv4 de referencia de um dominio monitorado.
+## Objetivo
 
-## Ambiente
+O NetGuard simula, em um ESP32, uma verificacao simples entre um IPv4 informado pelo Serial Monitor e um IPv4 de referencia fixo para um dominio monitorado.
 
-- Placa: ESP32 DevKit (`esp32dev`)
-- Framework: Arduino
-- Build: PlatformIO
-- Simulacao: Wokwi
-- Monitor serial: 115200 bps
+O sistema valida o formato do IPv4 digitado, compara o valor com a referencia configurada e sinaliza o resultado usando LEDs. O ESP32 desta atividade nao realiza DNS, Wi-Fi, WHOIS, HTTP, HTTPS, TLS ou consultas externas.
 
-## Configuracao central
+## Hardware
 
-Os valores ficam no inicio de `src/main.ino`:
-
-```cpp
-const char monitoredDomain[] = "PENDENTE_DE_PREENCHIMENTO";
-const char referenceIpv4[] = "0.0.0.0";
-const int buttonPin = 4;
-const int blueLedPin = 22;
-const int redLedPin = 23;
-```
-
-O enunciado/PDF com o dominio e IPv4 de referencia nao foi encontrado no workspace. Por isso, `monitoredDomain` e `referenceIpv4` estao claramente marcados como pendentes e devem ser preenchidos com os dados definidos no checkpoint de Cognitive CyberSecurity antes da demonstracao final.
-
-## Componentes
-
-- 1 ESP32 DevKit
+- ESP32 DevKit
 - 1 botao
 - 1 LED azul
 - 1 LED vermelho
 - 3 resistores de 1 kOhm
 - Jumpers
 
-## Conexoes
+## Configuracao
 
-Diagrama textual:
+Valores principais em `src/main.ino`:
+
+```cpp
+const char monitoredDomain[] = "github.com";
+const char referenceIpv4[] = "140.82.112.3";
+const int buttonPin = 4;
+const int blueLedPin = 22;
+const int redLedPin = 23;
+```
+
+- Dominio: `github.com`
+- IPv4 de referencia: `140.82.112.3`
+- Serial: `115200 baud`
+- Fim de linha no Wokwi: `CRLF`
+
+## Funcionamento
+
+1. Ao iniciar, os LEDs azul e vermelho ficam apagados.
+2. Ao pressionar o botao, o sistema apaga os LEDs e inicia uma nova verificacao.
+3. O Serial Monitor solicita um endereco IPv4.
+4. O usuario digita o IPv4 e pressiona Enter.
+5. O codigo valida o formato da entrada.
+6. Se a entrada for valida, o IPv4 informado e comparado com `140.82.112.3`.
+7. Se for igual a referencia, somente o LED azul acende.
+8. Se for diferente ou invalido, somente o LED vermelho acende.
+9. O sistema mostra dominio monitorado, IP informado e resultado, depois aguarda novo pressionamento do botao.
+
+A leitura serial e nao bloqueante e trata finais de linha `\n`, `\r` e `\r\n` sem processar duas vezes a mesma entrada. O botao usa debounce com `millis()`, sem `delay()` bloqueante.
+
+## Circuito
+
+Conexoes principais:
 
 ```text
 ESP32 GPIO 4  -> botao -> 3V3
@@ -54,36 +67,56 @@ catodo LED vermelho -> GND
 pio run
 ```
 
-## Como executar
+Se `pio` nao estiver no `PATH`, use a extensao PlatformIO do VS Code ou o executavel do PlatformIO instalado no ambiente.
 
-1. Inicie o ESP32 ou a simulacao no Wokwi.
-2. Abra o Serial Monitor em 115200 bps.
+## Como executar no Wokwi
+
+1. Abra a simulacao no Wokwi.
+2. Abra o Serial Monitor em `115200 baud`.
 3. Pressione o botao.
 4. Digite um IPv4 e pressione Enter.
-5. Observe o resultado no Serial Monitor e o LED correspondente.
+5. Confira o resultado no Serial Monitor e nos LEDs.
 
-Na inicializacao, os dois LEDs ficam apagados. Cada novo pressionamento desliga os LEDs, limpa a entrada anterior e inicia uma nova verificacao.
+## Experimentos
 
-## Regras de resultado
+| Experimento | IP | Tipo | LED azul | LED vermelho |
+| --- | --- | --- | --- | --- |
+| 1 | `140.82.112.3` | Referencia | Aceso | Apagado |
+| 2 | `4.228.31.150` | Publico diferente | Apagado | Aceso |
+| 3 | `192.168.15.8` | Privado | Apagado | Aceso |
 
-- IPv4 valido igual ao IPv4 de referencia: somente LED azul acende.
-- IPv4 valido diferente do IPv4 de referencia: somente LED vermelho acende.
-- Entrada em formato IPv4 invalido: somente LED vermelho acende e o Serial Monitor informa entrada invalida.
+Saidas esperadas no Serial Monitor:
 
-O codigo valida o formato IPv4 antes da comparacao e descarta linhas vazias para evitar verificacoes com entradas residuais.
+```text
+Dominio monitorado: github.com
+IP informado: 140.82.112.3
+Resultado: IP CORRETO
+```
 
-## Experimentos obrigatorios
+```text
+Dominio monitorado: github.com
+IP informado: 4.228.31.150
+Resultado: IP DIFERENTE DA REFERENCIA
+```
 
-Antes de executar os experimentos, preencha `monitoredDomain` e `referenceIpv4` com os dados corretos.
+```text
+Dominio monitorado: github.com
+IP informado: 192.168.15.8
+Resultado: IP DIFERENTE DA REFERENCIA
+```
 
-| Experimento | Entrada no Serial Monitor                | Resultado esperado                          |
-| ----------- | ---------------------------------------- | ------------------------------------------- |
-| 1           | IPv4 de referencia configurado           | LED azul ligado e mensagem `CORRESPONDENTE` |
-| 2           | IPv4 publico diferente do configurado    | LED vermelho ligado e mensagem `DIFERENTE`  |
-| 3           | IPv4 privado, por exemplo `192.168.0.10` | LED vermelho ligado e mensagem `DIFERENTE`  |
+## Teste opcional de IPv4 invalido
 
-## Observacoes
+| Entrada | Resultado esperado | LED azul | LED vermelho |
+| --- | --- | --- | --- |
+| `999.999.999.999` | IPv4 invalido | Apagado | Aceso |
 
-- O debounce do botao e feito com `millis()`, sem bloquear o loop principal.
-- A verificacao e iniciada apenas na transicao estavel do botao para pressionado, evitando multiplas verificacoes no mesmo acionamento.
-- O sistema nao realiza DNS, Wi-Fi ou qualquer consulta externa; a validacao e apenas a comparacao do IPv4 digitado com o IPv4 de referencia configurado.
+Tambem sao invalidos exemplos como `140.82.112`, `abc.def.ghi.jkl`, `140.82.112.3.4` e entrada vazia.
+
+## Observacao de seguranca
+
+Neste projeto, "IP diferente" significa divergencia em relacao a referencia fixa configurada. Isso nao significa necessariamente que ocorreu DNS spoofing ou outro ataque.
+
+Um IP diferente pode ocorrer legitimamente por distribuicao geografica, CDN, balanceamento, alteracao de infraestrutura ou multiplos servidores. Durante o trabalho de Cognitive CyberSecurity, consultas DNS realizadas pelo grupo retornaram `4.228.31.150` para `github.com`, enquanto a referencia definida para este checkpoint permaneceu `140.82.112.3`.
+
+O ESP32 desta atividade nao faz analise avancada. Ele apenas compara o IPv4 informado com uma referencia fixa.

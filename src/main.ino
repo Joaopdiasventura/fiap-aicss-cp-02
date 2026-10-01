@@ -1,8 +1,8 @@
 
 #include <Arduino.h>
 
-const char monitoredDomain[] = "PENDENTE_DE_PREENCHIMENTO";
-const char referenceIpv4[] = "0.0.0.0";
+const char monitoredDomain[] = "github.com";
+const char referenceIpv4[] = "140.82.112.3";
 
 const int buttonPin = 4;
 const int blueLedPin = 22;
@@ -16,7 +16,7 @@ unsigned long lastDebounceMs = 0;
 
 bool waitingForIp = false;
 String serialBuffer = "";
-bool ignoreNextLf = false;
+bool skipNextLf = false;
 
 void turnOffLeds() {
   digitalWrite(blueLedPin, LOW);
@@ -43,9 +43,7 @@ void printHeader() {
 void requestIpInput() {
   waitingForIp = true;
   serialBuffer = "";
-  ignoreNextLf = false;
-
-  while (Serial.available() > 0) Serial.read();
+  skipNextLf = false;
 
   turnOffLeds();
   printHeader();
@@ -75,24 +73,19 @@ bool readSerialLine(String &line) {
   while (Serial.available() > 0) {
     char currentChar = Serial.read();
 
-    if (ignoreNextLf && currentChar == '\n') {
-      ignoreNextLf = false;
+    if (skipNextLf && currentChar == '\n') {
+      skipNextLf = false;
       continue;
     }
 
-    ignoreNextLf = false;
+    skipNextLf = false;
 
     if (currentChar == '\r' || currentChar == '\n') {
       if (currentChar == '\r') {
-        ignoreNextLf = true;
+        skipNextLf = true;
       }
 
       serialBuffer.trim();
-
-      if (serialBuffer.length() == 0) {
-        serialBuffer = "";
-        return false;
-      }
 
       line = serialBuffer;
       serialBuffer = "";
@@ -147,7 +140,7 @@ void printResult(const String &ip, const char result[]) {
   Serial.print("Dominio monitorado: ");
   Serial.println(monitoredDomain);
 
-  Serial.print("IPv4 informado: ");
+  Serial.print("IP informado: ");
   Serial.println(ip);
 
   Serial.print("Resultado: ");
@@ -160,7 +153,7 @@ void printResult(const String &ip, const char result[]) {
 void verifyIp(const String &ip) {
   if (!isValidIpv4(ip)) {
     showRedOnly();
-    printResult(ip, "ENTRADA INVALIDA - formato IPv4 incorreto");
+    printResult(ip, "IPv4 INVALIDO");
 
     waitingForIp = false;
     return;
@@ -168,10 +161,10 @@ void verifyIp(const String &ip) {
 
   if (ip.equals(referenceIpv4)) {
     showBlueOnly();
-    printResult(ip, "CORRESPONDENTE - LED azul ligado");
+    printResult(ip, "IP CORRETO");
   } else {
     showRedOnly();
-    printResult(ip, "DIFERENTE - LED vermelho ligado");
+    printResult(ip, "IP DIFERENTE DA REFERENCIA");
   }
 
   waitingForIp = false;
